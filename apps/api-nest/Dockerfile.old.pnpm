@@ -1,0 +1,44 @@
+# from https://github.com/animavita/animavita/blob/v2/apps/backend/Dockerfile
+
+# build with:
+# docker build -t dona-civo-api -f ./apps/api/Dockerfile .
+
+FROM node:16 AS base
+RUN npm i -g pnpm
+
+FROM base AS dependencies
+WORKDIR /app
+COPY . .
+# workaround 
+# https://github.com/animavita/animavita/pull/134
+RUN rm .npmrc
+RUN mv .npmrc-default-node-linker .npmrc
+RUN pnpm install
+
+FROM dependencies as build
+RUN pnpm -r build
+
+
+# debug here:
+# https://chat.openai.com/c/f00c33dc-6792-4a50-a952-86fc8537b70c
+# docker build --target pruned -t dona-civo-api_pruned -f ./apps/api/Dockerfile .
+# docker run -it dona-civo-api_pruned /bin/bash
+FROM build as pruned
+WORKDIR /app
+RUN pnpm --filter api deploy pruned
+
+# debug here:
+# https://chat.openai.com/c/f00c33dc-6792-4a50-a952-86fc8537b70c
+# docker build --target development -t dona-civo-api_development -f ./apps/api/Dockerfile .
+# docker run -it dona-civo-api_development /bin/bash
+FROM base as development
+WORKDIR /app
+COPY --from=pruned /app/pruned .
+
+FROM base as deploy
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=pruned /app/pruned/dist .
+COPY --from=pruned /app/pruned/node_modules node_modules
+EXPOSE 3001
+ENTRYPOINT ["node", "main.js"]
