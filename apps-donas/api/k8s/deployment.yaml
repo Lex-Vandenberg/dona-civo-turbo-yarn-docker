@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    app: api
+spec:
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: api
+          image: starter/api-dev
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: dev-env-configmap
+          resources:
+            limits:
+              cpu: "300m"
+              memory: "600Mi"
+          env:
+            - name: ROOT_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: starter-db-pguser-postgres
+                  key: uri
+            - name: OWNER_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: starter-db-pguser-starter-owner
+                  key: uri
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: starter-db-pguser-starter-api
+                  key: uri
+            - name: DATABASE_AUTHENTICATOR_URL
+              valueFrom:
+                secretKeyRef:
+                  name: starter-db-pguser-starter-api-authenticator
+                  key: uri

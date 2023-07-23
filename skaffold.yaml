@@ -1,0 +1,29 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: dona-civo-turbo-yarn-docker
+build:
+  artifacts:
+    - image: donas-admin
+      context: .
+      docker:
+        dockerfile: apps-donas/admin/Dockerfile
+    - image: donas-api
+      context: .
+      docker:
+        dockerfile: apps-donas/api/Dockerfile
+portForward:
+- resourceType: service
+  resourceName: donas-api
+  port: 3001
+  localPort: 3333
+# manifests:
+#   kustomize:
+#     paths:
+#       - apps-donas/admin/k8s
+# profiles:
+#   - name: k8s
+#     manifests:
+#       kustomize:
+#         paths:
+#           - apps-donas/api/k8s

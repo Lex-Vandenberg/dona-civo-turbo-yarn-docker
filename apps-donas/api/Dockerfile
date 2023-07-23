@@ -1,5 +1,11 @@
 FROM node:18-alpine AS base
 
+# build image:
+# docker build --target runner -t dona-civo-turbo-yarn-docker-apps-dona-api -f ./apps-donas/api/Dockerfile .
+#
+# docker run 
+# docker run -p 3030:3000 dona-civo-turbo-yarn-docker-admin-runner
+
 # The web Dockerfile is copy-pasted into our main docs at /docs/handbook/deploying-with-docker.
 # Make sure you update this Dockerfile, the Dockerfile in the web workspace and copy that over to Dockerfile in the docs.
 
@@ -11,7 +17,7 @@ RUN apk update
 WORKDIR /app
 RUN yarn global add turbo
 COPY . .
-RUN turbo prune --scope=api-nest --docker
+RUN turbo prune --scope=@donas/api --docker
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
@@ -36,7 +42,7 @@ COPY turbo.json turbo.json
 # ARG TURBO_TOKEN
 # ENV TURBO_TOKEN=$TURBO_TOKEN
 
-RUN yarn turbo run build --filter=api-nest...
+RUN yarn turbo run build --filter=@donas/api...
 
 FROM base AS runner
 WORKDIR /app
@@ -47,6 +53,6 @@ RUN adduser --system --uid 1001 nestjs
 USER nestjs
 COPY --from=installer /app .
 
-# CMD node apps/api-nest/dist/index.js
+# CMD node apps/@donas/api/dist/index.js
 # ENTRYPOINT ["node", "main.js"]
-CMD node apps/api-nest/dist/main.js
+CMD node apps-donas/api/dist/main.js

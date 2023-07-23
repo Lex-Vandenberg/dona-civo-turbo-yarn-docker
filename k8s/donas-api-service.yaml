@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f ./docker-compose.yml
+    
+  
+  labels:
+    io.kompose.service: donas-api
+  name: donas-api
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "3001"
+      port: 3001
+      targetPort: 3000
+  selector:
+    io.kompose.service: donas-api
+status:
+  loadBalancer: {}

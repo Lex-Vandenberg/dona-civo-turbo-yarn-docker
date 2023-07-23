@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  labels:
+    app: admin
+spec:
+  selector:
+    matchLabels:
+      app: admin
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: admin
+          image: starter/admin-dev
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: dev-env-configmap
+          resources:
+            limits:
+              cpu: "400m"
+              memory: "800Mi"

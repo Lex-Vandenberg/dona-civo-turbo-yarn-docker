@@ -34,3 +34,7 @@ yarn-error.log*
 
 # turbo
 .turbo
+
+
+# Ignore DevSpace cache and log folder
+.devspace/
